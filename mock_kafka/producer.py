@@ -3,8 +3,139 @@ class Producer:
     Mocks the Producer class which sends messages to Kafka brokers
     """
 
+    # The full list of valid config keys for the producer
+    # Not sure if all of these work, this is taken from a configuration
+    # document for the underlying librdkafka C library,
+    # so it's possible some of these aren't implemented correctly
+    # with confluent-kafka
+    valid_keys = (
+        'bootstrap.servers',
+        'builtin.features',
+        'client.id',
+        'metadata.broker.list',
+        'message.max.bytes',
+        'message.copy.max.bytes',
+        'receive.message.max.bytes',
+        'max.in.flight.requests.per.connection',
+        'max.in.flight',
+        'metadata.request.timeout.ms',
+        'topic.metadata.refresh.interval.ms',
+        'metadata.max.age.ms',
+        'topic.metadata.refresh.fast.interval.ms',
+        'topic.metadata.refresh.fast.cnt',
+        'topic.metadata.refresh.sparse',
+        'topic.blacklist',
+        'debug',
+        'socket.timeout.ms',
+        'socket.blocking.max.ms',
+        'socket.send.buffer.bytes',
+        'socket.receive.buffer.bytes',
+        'socket.keepalive.enable',
+        'socket.nagle.disable',
+        'socket.max.fails',
+        'broker.address.ttl',
+        'broker.address.family',
+        'reconnect.backoff.jitter.ms',
+        'reconnect.backoff.ms',
+        'reconnect.backoff.max.ms',
+        'statistics.interval.ms',
+        'enabled_events',
+        'error_cb',
+        'throttle_cb',
+        'stats_cb',
+        'log_cb',
+        'log_level',
+        'log.queue',
+        'log.thread.name',
+        'log.connection.close',
+        'background_event_cb',
+        'socket_cb',
+        'connect_cb',
+        'closesocket_cb',
+        'open_cb',
+        'opaque',
+        'default_topic_conf',
+        'internal.termination.signal',
+        'api.version.request',
+        'api.version.request.timeout.ms',
+        'api.version.fallback.ms',
+        'broker.version.fallback',
+        'security.protocol',
+        'ssl.cipher.suites',
+        'ssl.curves.list',
+        'ssl.sigalgs.list',
+        'ssl.key.location',
+        'ssl.key.password',
+        'ssl.certificate.location',
+        'ssl.ca.location',
+        'ssl.crl.location',
+        'ssl.keystore.location',
+        'ssl.keystore.password',
+        'sasl.mechanisms',
+        'sasl.mechanism',
+        'sasl.kerberos.service.name',
+        'sasl.kerberos.principal',
+        'sasl.kerberos.kinit.cmd',
+        'sasl.kerberos.keytab',
+        'sasl.kerberos.min.time.before.relogin',
+        'sasl.username',
+        'sasl.password',
+        'plugin.library.paths',
+        'enable.idempotence',
+        'enable.gapless.guarantee',
+        'queue.buffering.max.messages',
+        'queue.buffering.max.kbytes',
+        'queue.buffering.max.ms',
+        'linger.ms',
+        'message.send.max.retries',
+        'retries',
+        'retry.backoff.ms',
+        'queue.buffering.backpressure.threshold',
+        'compression.codec',
+        'compression.type',
+        'batch.num.messages',
+        'delivery.report.only.error',
+        'dr_cb',
+        'dr_msg_cb',
+        'request.required.acks',
+        'acks',
+        'request.timeout.ms',
+        'message.timeout.ms',
+        'delivery.timeout.ms',
+        'queuing.strategy',
+        'produce.offset.report',
+        'partitioner',
+        'partitioner_cb',
+        'msg_order_cmp',
+        'opaque',
+        'compression.codec',
+        'compression.type',
+        'compression.level'
+    )
+
     def __init__(self, config):
+        self._check_config(config)
         self._config = config
+
+    def _check_config(self, config):
+        """
+        Mimics how the real Producer behaves with it's config
+
+        The real producer will fail when initialized without `bootstrap.servers`
+        and if there are any invalid arguments in the config
+        :param config: (dict) The config dictionary being checked
+        :return: None
+        """
+        assert config['bootstrap.servers']
+
+        invalid_keys = [
+            key for key in config.keys()
+            if key not in self.valid_keys
+        ]
+        if invalid_keys:
+            raise ValueError(
+                "The following keys are not supported by the config: {}".format(
+                    invalid_keys))
 
     def len(self):
         """
