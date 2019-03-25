@@ -19,14 +19,14 @@ class TestMessage(unittest.TestCase):
 
     def setUp(self):
         self.message = Message(
-                value=b'test-value',
-                topic='test-topic',
-                headers=(
-                        ('test-header-key-1', 'test-header-value-1'),
-                        ('test-header-key-2', 'test-header-value-2')
-                        ),
-                key='test-key'
-            )
+            value=b'test-value',
+            topic='test-topic',
+            headers=(
+                ('test-header-key-1', 'test-header-value-1'),
+                ('test-header-key-2', 'test-header-value-2')
+            ),
+            key='test-key'
+        )
 
     def test_init(self):
         self.assertIsNotNone(self.message)
@@ -45,31 +45,33 @@ class TestMessage(unittest.TestCase):
 
     def test_headers(self):
         self.assertTupleEqual(
-                self.message.headers(),
-                (
-                    ('test-header-key-1', 'test-header-value-1'),
-                    ('test-header-key-2', 'test-header-value-2')
-                )
+            self.message.headers(),
+            (
+                ('test-header-key-1', 'test-header-value-1'),
+                ('test-header-key-2', 'test-header-value-2')
             )
+        )
 
     def test_offset(self):
-        raise NotImplementedError
+        message = Message(offset=1)
+        self.assertEqual(message.offset(), 1)
 
     def test_partition(self):
-        raise NotImplementedError
+        message = Message(partition=1)
+        self.assertEqual(message.partition(), 1)
 
     def test_set_headers(self):
         self.message.set_headers(
-                (
-                    ('new-header-key-1', 'new-header-value-1'),
-                    ('new-header-key-2', 'new-header-value-2')
-                ))
-        self.assertEqual(self.message._headers, 
-        (
-                    ('new-header-key-1', 'new-header-value-1'),
-                    ('new-header-key-2', 'new-header-value-2')
-                )
-        )
+            (
+                ('new-header-key-1', 'new-header-value-1'),
+                ('new-header-key-2', 'new-header-value-2')
+            ))
+        self.assertEqual(self.message._headers,
+                         (
+                             ('new-header-key-1', 'new-header-value-1'),
+                             ('new-header-key-2', 'new-header-value-2')
+                         )
+                         )
 
     def test_set_key(self):
         self.message.set_value('new-key')
@@ -79,12 +81,30 @@ class TestMessage(unittest.TestCase):
         self.message.set_value(b'some-new-value')
         self.assertEqual(self.message._value, b'some-new-value')
 
-    def test_timestamp(self):
-        raise NotImplementedError
+    def test_create_timestamp(self):
+        message = Message(create_time=1553527487)
+        self.assertTupleEqual(
+            message.timestamp(),
+            (confluent_kafka.TIMESTAMP_CREATE_TIME, 1553527487)
+        )
+
+    def test_timestamp_not_available(self):
+        message = self.message
+
+        self.assertTupleEqual(
+            message.timestamp(),
+            (confluent_kafka.TIMESTAMP_NOT_AVAILABLE, None)
+        )
+
+    def test_log_timestamp(self):
+        message = Message(log_time=1553527487)
+        self.assertTupleEqual(
+            message.timestamp(),
+            (confluent_kafka.TIMESTAMP_LOG_APPEND_TIME, 1553527487)
+        )
 
     def test_topic(self):
         self.assertEqual(self.message.topic(), 'test-topic')
 
     def test_value(self):
         self.assertEqual(self.message.value(), b'test-value')
-
