@@ -32,7 +32,7 @@ class TestMessage(unittest.TestCase):
         self.assertIsNotNone(self.message)
 
     def test_key_method(self):
-        self.assertEqual('test_key', self.message.key())
+        self.assertEqual('test-key', self.message.key())
 
     def test_no_error(self):
         self.assertIsNone(self.message.error())
@@ -59,20 +59,32 @@ class TestMessage(unittest.TestCase):
         raise NotImplementedError
 
     def test_set_headers(self):
-        raise NotImplementedError
+        self.message.set_headers(
+                (
+                    ('new-header-key-1', 'new-header-value-1'),
+                    ('new-header-key-2', 'new-header-value-2')
+                ))
+        self.assertEqual(self.message._headers, 
+        (
+                    ('new-header-key-1', 'new-header-value-1'),
+                    ('new-header-key-2', 'new-header-value-2')
+                )
+        )
 
     def test_set_key(self):
-        raise NotImplementedError
+        self.message.set_value('new-key')
+        self.assertEqual(self.message._value, 'new-key')
 
     def test_set_value(self):
-        raise NotImplementedError
+        self.message.set_value(b'some-new-value')
+        self.assertEqual(self.message._value, b'some-new-value')
 
     def test_timestamp(self):
         raise NotImplementedError
 
     def test_topic(self):
-        raise NotImplementedError
+        self.assertEqual(self.message.topic(), 'test-topic')
 
     def test_value(self):
-        raise NotImplementedError
+        self.assertEqual(self.message.value(), b'test-value')
 

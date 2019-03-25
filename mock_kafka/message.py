@@ -26,3 +26,26 @@ class Message:
         if self._kafka_error:
             raise self._kafka_error
 
+    def key(self):
+        """
+        Getter method for the key attribute
+        """
+        return self._key
+
+    def set_key(self, key):
+        self._key = key
+
+    def value(self):
+        """
+        Gets the value attribute
+        """
+        return self._value
+
+    def set_value(self, value):
+        self._value = value
+
+    def set_headers(self, headers):
+        self._headers = headers
+
+    def headers(self):
+        return self._headers
