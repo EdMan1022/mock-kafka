@@ -1,3 +1,6 @@
+import confluent_kafka as ck
+
+
 class Producer:
     """
     Mocks the Producer class which sends messages to Kafka brokers
@@ -116,6 +119,7 @@ class Producer:
     def __init__(self, config):
         self._check_config(config)
         self._config = config
+        self._cluster_metadata = None
 
     def _check_config(self, config):
         """
@@ -136,6 +140,28 @@ class Producer:
             raise ValueError(
                 "The following keys are not supported by the config: {}".format(
                     invalid_keys))
+
+    def configure_topic_metadata(self, topic_list, cluster_id=None,
+                                 controller_id=-1, brokers=None, topics=None,
+                                 orig_broker_id=None, orig_broker_name=None):
+        """
+        Allows the user to configure what the `list_topics` method returns
+        :param topic_list:
+        :param cluster_id:
+        :param controller_id:
+        :param brokers:
+        :param topics:
+        :param orig_broker_id:
+        :param orig_broker_name:
+        :return:
+        """
+        self._cluster_metadata = ck.admin.ClusterMetadata()
+        self._cluster_metadata.cluster_id = cluster_id
+        self._cluster_metadata.controller_id = controller_id
+        self._cluster_metadata.brokers = brokers
+        self._cluster_metadata.topics = topics
+        self._cluster_metadata.orig_broker_id = orig_broker_id
+        self._cluster_metadata.orig_broker_name = orig_broker_name
 
     def len(self):
         """
@@ -181,6 +207,9 @@ class Producer:
         """
         Mocks producing a message to a topic
 
+        Checks the incoming arguments for compatibility,
+        raising the same error as the real Producer in the same situations
+
         :param topic: (str) Topic to produce message to
         :param value: (str|bytes) Message payload
         :param key: (str|bytes) Message key
@@ -191,4 +220,9 @@ class Producer:
         :param headers: (dict) Message headers
         :return: None
         """
-        raise NotImplementedError
+
+        if type(value) != bytes:
+            raise ck.KafkaException(
+                "The message value needs to be a bytes string, not type {}".format(
+                    type(value)))
+        return 0
